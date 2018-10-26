@@ -3,39 +3,36 @@
 
 #define SLAVE_ADDRESS 0x04
 
-int letter_1 = 25;
+int letter_1 = 0;
 int letter_2 = 1;
 
-ShiftRegister74HC595 sr (2, 12, 8, 13);
-//ShiftRegister74HC595 display_A (2, 7, 6, 8);
-//ShiftRegister74HC595 display_B (2, 12, 8, 13);
+int clockPin = 11;
+int latchPin = 12;
+
+ShiftRegister74HC595 display_A (2, 9, clockPin, latchPin);
+ShiftRegister74HC595 display_B (2, 10, clockPin, latchPin);
 
 void setup() {
   Wire.begin(SLAVE_ADDRESS);
   Wire.onReceive(changeDisplay);
 }
 
-void loop() {  
+void loop() {
   int count = 0;
   int timer = 50;
-  while (count < timer) {
-    renderLetter(letter_1, letter_2);
-//    update_display(letter_1, display_A);
-//    update_display(letter_2, display_B);
-    count++;
-  }
-  count = 0;
+  update_display(letter_1, display_A);
+  update_display(letter_2, display_B);
 }
 
 void changeDisplay(int byteCount) {
-//  while(Wire.available()) {
-//    int number = Wire.read();
-//    if (number >= 200) {
-//      letter_2 = number - 200;
-//    } else {
-//      letter_1 = number - 100;
-//    }
-//  }
+  while (Wire.available()) {
+    int number = Wire.read();
+    if (number >= 200) {
+      letter_2 = number - 200;
+    } else {
+      letter_1 = number - 100;
+    }
+  }
 }
 
 uint8_t alphabet[26][7] = {
@@ -275,28 +272,28 @@ uint8_t alphabet[26][7] = {
   }
 };
 
-void update_display(int letter, ShiftRegister74HC595 sr) {
+void update_display(int letter, ShiftRegister74HC595 x) {
   uint8_t r = 1;
   uint8_t row[2];
   for (int count = 0; count < 7; count++) {
     row[0] = alphabet[letter][count];
     row[1] = r;
-    //display_B.setAll(row);
+    x.setAll(row);
     delay(1);
     r = r << 1;
   }
 }
 
 void renderLetter(int letter, int letter2) {
-  uint8_t r = 1;
-  uint8_t row[2];
-  for (int count = 0; count < 7; count++) {
-    row[0] = alphabet[letter][count];
-    row[1] = r;
-    row[2] = alphabet[letter2][count];
-    row[3] = r;
-    sr.setAll(row);
-    delay(1);
-    r = r << 1;
-  }
+  //  uint8_t r = 1;
+  //  uint8_t row[2];
+  //  for (int count = 0; count < 7; count++) {
+  //    row[0] = alphabet[letter][count];
+  //    row[1] = r;
+  //    row[2] = alphabet[letter2][count];
+  //    row[3] = r;
+  //    sr.setAll(row);
+  //    delay(1);
+  //    r = r << 1;
+  //  }
 }
